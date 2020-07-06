@@ -1,0 +1,34 @@
+--- a/net/minecraft/world/gen/DebugChunkGenerator.java
++++ b/net/minecraft/world/gen/DebugChunkGenerator.java
+@@ -29,11 +29,18 @@
+    public static final Codec<DebugChunkGenerator> field_236066_e_ = MapCodec.of(Encoder.empty(), Decoder.unit(() -> {
+       return field_236065_d_;
+    })).stable().codec();
+-   private static final List<BlockState> field_177464_a = StreamSupport.stream(Registry.field_212618_g.spliterator(), false).flatMap((p_236067_0_) -> {
+-      return p_236067_0_.func_176194_O().func_177619_a().stream();
+-   }).collect(Collectors.toList());
+-   private static final int field_177462_b = MathHelper.func_76123_f(MathHelper.func_76129_c((float)field_177464_a.size()));
+-   private static final int field_181039_c = MathHelper.func_76123_f((float)field_177464_a.size() / (float)field_177462_b);
++   private static List<BlockState> field_177464_a = null;
++   private static int field_177462_b = 0;
++   private static int field_181039_c = 0;
++   private static void initValidStates() {
++      if (field_177464_a == null) {
++         field_177464_a = StreamSupport.stream(Registry.field_212618_g.spliterator(), false).flatMap((p_236067_0_) -> {
++            return p_236067_0_.func_176194_O().func_177619_a().stream();
++         }).collect(Collectors.toList());
++         field_177462_b = MathHelper.func_76123_f(MathHelper.func_76129_c((float)field_177464_a.size()));
++         field_181039_c = MathHelper.func_76123_f((float)field_177464_a.size() / (float)field_177462_b);
++      }
++   }
+    protected static final BlockState field_185934_a = Blocks.field_150350_a.func_176223_P();
+    protected static final BlockState field_185935_b = Blocks.field_180401_cv.func_176223_P();
+ 
+@@ -91,6 +98,7 @@
+       if (p_177461_0_ > 0 && p_177461_1_ > 0 && p_177461_0_ % 2 != 0 && p_177461_1_ % 2 != 0) {
+          p_177461_0_ = p_177461_0_ / 2;
+          p_177461_1_ = p_177461_1_ / 2;
++         initValidStates();
+          if (p_177461_0_ <= field_177462_b && p_177461_1_ <= field_181039_c) {
+             int i = MathHelper.func_76130_a(p_177461_0_ * field_177462_b + p_177461_1_);
+             if (i < field_177464_a.size()) {
