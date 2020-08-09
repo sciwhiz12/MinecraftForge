@@ -20,13 +20,19 @@
 package net.minecraftforge.client.event;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.fml.LogicalSide;
 
 /**
- * This event is called before the pushOutOfBlocks calls in EntityPlayerSP.
+ * <p>Fired before a player is checked for being inside a block, to push out if the block is solid. </p>
  *
- * Cancelling the event will prevent pushOutOfBlocks from being called.
+ * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+ * If this event is cancelled, then the player will not be pushed. </p>
+ *
+ * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
  */
 @Cancelable
 public class PlayerSPPushOutOfBlocksEvent extends PlayerEvent
@@ -39,10 +45,18 @@ public class PlayerSPPushOutOfBlocksEvent extends PlayerEvent
         this.minY = player.getPosY() + 0.5D;
     }
 
+    /**
+     * Sets the minimum Y value to check for the block that can push the player.
+     *
+     * @param value the new minimum Y value
+     */
     public void setMinY(double value) {
         this.minY = value;
     }
 
+    /**
+     * @return the minimum Y value to check for a block; defaults to player's Y postition + {@code 0.5D}
+     */
     public double getMinY() {
         return this.minY;
     }

@@ -28,23 +28,23 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextProperties;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 
 /**
- * A set of events which are fired at various points during tooltip rendering.
- * <p>
- * Can be used to change the rendering parameters, draw something extra, etc.
- * <p>
- * Do not use this event directly, use one of the subclasses:
- * <ul>
- * <li>{@link RenderTooltipEvent.Pre}</li>
- * <li>{@link RenderTooltipEvent.PostBackground}</li>
- * <li>{@link RenderTooltipEvent.PostText}</li>
- * </ul>
+ * <p>Fired when a tooltip is rendering. <br/>
+ * See the various subclasses for listening to specific events. </p>
+ *
+ * @see RenderTooltipEvent.Pre
+ * @see RenderTooltipEvent.Post
+ * @see RenderTooltipEvent.Color
+ * @see GuiUtils#drawHoveringText(ItemStack, MatrixStack, List, int, int, int, int, int, int, int, int, FontRenderer)
  */
-public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api.Event
+public abstract class RenderTooltipEvent extends Event
 {
     @Nonnull
     protected final ItemStack stack;
@@ -57,7 +57,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     public RenderTooltipEvent(@Nonnull ItemStack stack, @Nonnull List<? extends ITextProperties> lines, MatrixStack matrixStack, int x, int y, @Nonnull FontRenderer fr)
     {
         this.stack = stack;
-        this.lines = Collections.unmodifiableList(lines); // Leave editing to ItemTooltipEvent
+        this.lines = Collections.unmodifiableList(lines);
         this.matrixStack = matrixStack;
         this.x = x;
         this.y = y;
@@ -65,7 +65,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * @return The stack which the tooltip is being rendered for. As tooltips can be drawn without itemstacks, this stack may be empty.
+     * @return the stack which the tooltip is being rendered for; may be {@link ItemStack#EMPTY}
      */
     @Nonnull
     public ItemStack getStack()
@@ -74,9 +74,10 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
     
     /**
-     * The lines to be drawn. May change between {@link RenderTooltipEvent.Pre} and {@link RenderTooltipEvent.Post}.
-     * 
-     * @return An <i>unmodifiable</i> list of strings. Use {@link ItemTooltipEvent} to modify tooltip text.
+     * <p>The lines to be drawn. May change between {@link RenderTooltipEvent.Pre} and {@link RenderTooltipEvent.Post}. <br/>
+     * <em>Use {@link ItemTooltipEvent} to modify tooltip text. </em></p>
+     *
+     * @return the unmodifiable list of text on the tooltip
      */
     @Nonnull
     public List<? extends ITextProperties> getLines()
@@ -85,7 +86,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * @return The MatrixStack of the current rendering context
+     * @return the matrix stack used for rendering
      */
     public MatrixStack getMatrixStack()
     {
@@ -93,7 +94,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * @return The X position of the tooltip box. By default, the mouse X position.
+     * @return the X position of the tooltip box
      */
     public int getX()
     {
@@ -101,7 +102,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * @return The Y position of the tooltip box. By default, the mouse Y position.
+     * @return the Y position of the tooltip box
      */
     public int getY()
     {
@@ -109,7 +110,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
     
     /**
-     * @return The {@link FontRenderer} instance the current render is using.
+     * @return The font renderer
      */
     @Nonnull
     public FontRenderer getFontRenderer()
@@ -118,11 +119,18 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * This event is fired before any tooltip calculations are done. It provides setters for all aspects of the tooltip, so the final render can be modified.
-     * <p>
-     * This event is {@link Cancelable}.
+     * <p>Fired <b>before</b> the tooltip is rendered. <br/>
+     * This can be used to modify the positioning of the tooltip. </p>
+     *
+     * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+     * If this event is cancelled, then the tooltip will not be rendered and the corresponding
+     * {@link RenderTooltipEvent.Color}, {@link RenderTooltipEvent.PostBackground}, and
+     * {@link RenderTooltipEvent.PostText} will not be fired. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
      */
-    @net.minecraftforge.eventbus.api.Cancelable
+    @Cancelable
     public static class Pre extends RenderTooltipEvent
     {
         private int screenWidth;
@@ -137,6 +145,9 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
             this.maxWidth = maxWidth;
         }
 
+        /**
+         * @return the width of the screen
+         */
         public int getScreenWidth()
         {
             return screenWidth;
@@ -158,7 +169,10 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         }
 
         /**
-         * @return The max width the tooltip can be. Defaults to -1 (unlimited).
+         * <p>Returns the maximum width of the tooltip when being rendered. <br/>
+         * A value of {@code -1} means an unlimited maximum width. </p>
+         *
+         * @return the maximum width
          */
         public int getMaxWidth()
         {
@@ -166,7 +180,10 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         }
 
         /**
-         * Sets the max width of the tooltip. Use -1 for unlimited.
+         * <p>Sets the maximum width of the tooltip. <br/>
+         * Use {@code -1} for unlimited maximum width. </p>
+         *
+         * @param maxWidth the new maximum width
          */
         public void setMaxWidth(int maxWidth)
         {
@@ -175,6 +192,8 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         
         /**
          * Sets the {@link FontRenderer} to be used to render text.
+         *
+         * @param fr the new font renderer
          */
         public void setFontRenderer(@Nonnull FontRenderer fr)
         {
@@ -182,7 +201,9 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         }
 
         /**
-         * Set the X origin of the tooltip.
+         * Sets the X origin of the tooltip.
+         *
+         * @param x the new X origin
          */
         public void setX(int x)
         {
@@ -190,7 +211,9 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         }
 
         /**
-         * Set the Y origin of the tooltip.
+         * Sets the Y origin of the tooltip.
+         *
+         * @param y the new Y origin
          */
         public void setY(int y)
         {
@@ -199,13 +222,11 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * Events inheriting from this class are fired at different stages during the tooltip rendering.
-     * <p>
-     * Do not use this event directly, use one of its subclasses:
-     * <ul>
-     * <li>{@link RenderTooltipEvent.PostBackground}</li>
-     * <li>{@link RenderTooltipEvent.PostText}</li>
-     * </ul>
+     * <p>Fired <b>after</b> the tooltip is rendered, at different points. <br/>
+     * See the two subclasses for listening to after background or after text rendering. </p>
+     *
+     * @see RenderTooltipEvent.PostBackground
+     * @see RenderTooltipEvent.PostText
      */
     protected static abstract class Post extends RenderTooltipEvent
     {
@@ -220,7 +241,7 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         }
 
         /**
-         * @return The width of the tooltip box. This is the width of the <i>inner</i> box, not including the border.
+         * @return the width of the inner tooltip box (not including border)
          */
         public int getWidth()
         {
@@ -228,16 +249,21 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
         }
 
         /**
-         * @return The height of the tooltip box. This is the height of the <i>inner</i> box, not including the border.
+         * @return the height of the inner tooltip box (not including border)
          */
         public int getHeight()
         {
             return height;
         }
     }
-    
+
     /**
-     * This event is fired directly after the tooltip background is drawn, but before any text is drawn.
+     * <p>Fired <b>after</b> the tooltip background is rendered, and <em>before</em> the tooltip text is rendered. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
      */
     public static class PostBackground extends Post 
     {
@@ -246,16 +272,27 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
     }
 
     /**
-     * This event is fired directly after the tooltip text is drawn, but before the GL state is reset.
+     * <p>Fired <b>after</b> the tooltip text is rendered. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
      */
     public static class PostText extends Post
     {
         public PostText(@Nonnull ItemStack stack, @Nonnull List<? extends ITextProperties> textLines, MatrixStack matrixStack, int x, int y, @Nonnull FontRenderer fr, int width, int height)
             { super(stack, textLines, matrixStack, x, y, fr, width, height); }
     }
-    
+
     /**
-     * This event is fired when the colours for the tooltip background are determined. 
+     * <p>Fired <em>directly <b>before</b> the tooltip background</em> is rendered. <br/>
+     * This can be used to modify the background color and the border's gradient colors. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
      */
     public static class Color extends RenderTooltipEvent
     {
@@ -278,46 +315,79 @@ public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api
             this.borderEnd = borderEnd;
         }
 
+        /**
+         * @return the current tooltip background color
+         */
         public int getBackground()
         {
             return background;
         }
 
+        /**
+         * Sets the new color for the tooltip background.
+         *
+         * @param background the new tooltip background color
+         */
         public void setBackground(int background)
         {
             this.background = background;
         }
 
+        /**
+         * @return the start color for the tooltip border
+         */
         public int getBorderStart()
         {
             return borderStart;
         }
 
+        /**
+         * Sets the new start color for the gradient of the tooltip border.
+         *
+         * @param borderStart the new start color for the tooltip border
+         */
         public void setBorderStart(int borderStart)
         {
             this.borderStart = borderStart;
         }
 
+        /**
+         * @return the end color for the tooltip border
+         */
         public int getBorderEnd()
         {
             return borderEnd;
         }
 
+        /**
+         * Sets the new end color for the gradient of the tooltip border.
+         *
+         * @param borderEnd the new end color for the tooltip border
+         */
         public void setBorderEnd(int borderEnd)
         {
             this.borderEnd = borderEnd;
         }
 
+        /**
+         * @return the original tooltip background color
+         */
         public int getOriginalBackground()
         {
             return originalBackground;
         }
 
+        /**
+         * @return the original tooltip border's start color
+         */
         public int getOriginalBorderStart()
         {
             return originalBorderStart;
         }
 
+        /**
+         * @return the original tooltip border's end color
+         */
         public int getOriginalBorderEnd()
         {
             return originalBorderEnd;

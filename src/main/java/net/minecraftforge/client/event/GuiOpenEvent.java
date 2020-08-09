@@ -19,19 +19,26 @@
 
 package net.minecraftforge.client.event;
 
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraftforge.fml.LogicalSide;
 
 /**
- * This event is called before any Gui will open.
- * If you don't want this to happen, cancel the event.
- * If you want to override this Gui, simply set the gui variable to your own Gui.
- * 
+ * <p>Fired before any {@link Screen} will be opened, for changing it or preventing it from being opened.</p>
+ *
+ * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+ * If this event is cancelled, then the {@code Screen} shall be prevented from opening</p>
+ *
+ * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+ *
  * @author jk-5
  */
-@net.minecraftforge.eventbus.api.Cancelable
-public class GuiOpenEvent extends net.minecraftforge.eventbus.api.Event
+@Cancelable
+public class GuiOpenEvent extends Event
 {
     private Screen gui;
     public GuiOpenEvent(Screen gui)
@@ -39,11 +46,18 @@ public class GuiOpenEvent extends net.minecraftforge.eventbus.api.Event
         this.setGui(gui);
     }
 
+    /**
+     * @return the screen that will be opened, if the event is not cancelled
+     */
     public Screen getGui()
     {
         return gui;
     }
 
+    /**
+     * Sets the new {@code Screen} to be opened, if the event is not cancelled.
+     * @param gui the new screen
+     */
     public void setGui(Screen gui)
     {
         this.gui = gui;

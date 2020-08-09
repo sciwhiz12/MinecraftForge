@@ -24,18 +24,27 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.ItemFrameRenderer;
 import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
 /**
- * This event is called when an item is rendered in an item frame.
+ * <p>Fired before an item stack is rendered in an item frame. <br/>
+ * This can be used to prevent normal rendering and add custom rendering. </p>
  *
- * You can set canceled to do no further vanilla processing.
+ * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+ * If the event is cancelled, then the item stack will not be rendered</p>
+ *
+ * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+ *
+ * @see ItemFrameRenderer
  */
 @Cancelable
-public class RenderItemInFrameEvent extends net.minecraftforge.eventbus.api.Event
+public class RenderItemInFrameEvent extends Event
 {
     private final ItemStack item;
     private final ItemFrameEntity entityItemFrame;
@@ -55,30 +64,48 @@ public class RenderItemInFrameEvent extends net.minecraftforge.eventbus.api.Even
         this.light = light;
     }
 
+    /**
+     * @return the item stack being rendered
+     */
     @Nonnull
     public ItemStack getItem()
     {
         return item;
     }
 
+    /**
+     * @return the item frame entity
+     */
     public ItemFrameEntity getEntityItemFrame()
     {
         return entityItemFrame;
     }
 
+    /**
+     * @return the renderer for the item frame entity
+     */
     public ItemFrameRenderer getRenderer()
     {
         return renderer;
     }
 
+    /**
+     * @return the matrix stack used for rendering
+     */
     public MatrixStack getMatrix() {
         return matrix;
     }
 
+    /**
+     * @return the rendering buffers
+     */
     public IRenderTypeBuffer getBuffers() {
         return buffers;
     }
 
+    /**
+     * @return the amount of packed (sky and block) light for rendering
+     */
     public int getLight() {
         return light;
     }

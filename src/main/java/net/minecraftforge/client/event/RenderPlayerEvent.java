@@ -21,14 +21,24 @@ package net.minecraftforge.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
+/**
+ * <p>Fired when a player is being rendered. <br/>
+ * See the two subclasses for listening for before and after rendering. </p>
+ *
+ * @see RenderPlayerEvent.Pre
+ * @see RenderPlayerEvent.Post
+ * @see PlayerRenderer
+ */
 public abstract class RenderPlayerEvent extends PlayerEvent
 {
     private final PlayerRenderer renderer;
@@ -47,13 +57,43 @@ public abstract class RenderPlayerEvent extends PlayerEvent
         this.light = light;
     }
 
+    /**
+     * @return the renderer for the player entity
+     */
     public PlayerRenderer getRenderer() { return renderer; }
+
+    /**
+     * @return the amount of partial ticks
+     */
     public float getPartialRenderTick() { return partialRenderTick; }
+
+    /**
+     * @return the matrix stack used for rendering
+     */
     public MatrixStack getMatrixStack() { return stack; }
+
+    /**
+     * @return the rendering buffers
+     */
     public IRenderTypeBuffer getBuffers() { return buffers; }
+
+    /**
+     * @return the amount of packed (sky and block) light for rendering
+     */
     public int getLight() { return light; }
 
-    @net.minecraftforge.eventbus.api.Cancelable
+    /**
+     * <p>Fired <b>before</b> the player is rendered. <br/>
+     * This can be used for rendering additional effects or suppressing rendering. </p>
+     *
+     * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+     * If this event is cancelled, then the player will not be rendered and the corresponding
+     * {@link RenderPlayerEvent.Post} will not be fired. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     */
+    @Cancelable
     public static class Pre extends RenderPlayerEvent
     {
         public Pre(PlayerEntity player, PlayerRenderer renderer, float tick, MatrixStack stack, IRenderTypeBuffer buffers, int light) {
@@ -61,6 +101,14 @@ public abstract class RenderPlayerEvent extends PlayerEvent
         }
     }
 
+    /**
+     * <p>Fired <b>after</b> the player is rendered, if the corresponding {@link RenderPlayerEvent.Pre} is not cancelled. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     */
     public static class Post extends RenderPlayerEvent
     {
         public Post(PlayerEntity player, PlayerRenderer renderer, float tick, MatrixStack stack, IRenderTypeBuffer buffers, int light) {

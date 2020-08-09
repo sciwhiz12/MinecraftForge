@@ -22,20 +22,43 @@ package net.minecraftforge.client.event;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FireBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.LogicalSide;
 
 /**
- * Called when a block's texture is going to be overlaid on the player's HUD. Cancel this event to prevent the overlay.
+ * <p>Fired before a block texture will be overlaid on the player's view. </p>
+ *
+ * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+ * If this event is cancelled, then the overlay will not be rendered. </p>
+ *
+ * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+ *
+ * @see ForgeEventFactory#renderBlockOverlay(PlayerEntity, MatrixStack, OverlayType, BlockState, BlockPos)
  */
 @Cancelable
 public class RenderBlockOverlayEvent extends Event
 {
 
     public static enum OverlayType {
-        FIRE, BLOCK, WATER
+        /**
+         * The type of the overlay when the player is burning / on fire.
+         */
+        FIRE,
+        /**
+         * The type of overlay when the player is suffocating inside a solid block.
+         */
+        BLOCK,
+        /**
+         * The type of overlay when the player is underwater.
+         */
+        WATER
     }
     
     private final PlayerEntity player;
@@ -55,17 +78,27 @@ public class RenderBlockOverlayEvent extends Event
     }
 
     /**
-     * The player which the overlay will apply to
+     * @return the player which the overlay will apply to
      */
     public PlayerEntity getPlayer() { return player; }
-    public MatrixStack getMatrixStack() { return mat; }
+
     /**
-     * The type of overlay to occur
+     * @return the matrix stack used for rendering
+     */
+    public MatrixStack getMatrixStack() { return mat; }
+
+    /**
+     * @return the type of the overlay
      */
     public OverlayType getOverlayType() { return overlayType; }
+
     /**
-     * If the overlay type is BLOCK, then this is the block which the overlay is getting it's icon from
+     * @return the block from which the overlay is gotten from
      */
     public BlockState getBlockForOverlay() { return blockForOverlay; }
+
+    /**
+     * @return the position of the block from which the overlay is gotten from
+     */
     public BlockPos getBlockPos() { return blockPos; }
 }

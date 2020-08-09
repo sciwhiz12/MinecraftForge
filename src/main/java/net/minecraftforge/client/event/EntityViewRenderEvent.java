@@ -21,15 +21,32 @@ package net.minecraftforge.client.event;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.FogRenderer.FogType;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.LogicalSide;
 
 /**
- * Event that hooks into GameRenderer, allowing any feature to customize visual attributes
- *  the player sees.
+ * <p>Fired for hooking into the entity view rendering in {@link GameRenderer}. <br/>
+ * This can be used for customizing the visual features visible to the player. <br/>
+ * See the various subclasses for listening to different features. </p>
+ *
+ * <p>These events are fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+ *
+ * @see EntityViewRenderEvent.FogEvent
+ * @see EntityViewRenderEvent.FogDensity
+ * @see EntityViewRenderEvent.RenderFogEvent
+ * @see EntityViewRenderEvent.FogColors
+ * @see EntityViewRenderEvent.CameraSetup
+ * @see EntityViewRenderEvent.FOVModifier
  */
-public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.api.Event
+public abstract class EntityViewRenderEvent extends Event
 {
     private final GameRenderer renderer;
     private final ActiveRenderInfo info;
@@ -42,21 +59,42 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
         this.renderPartialTicks = renderPartialTicks;
     }
 
+    /**
+     * @return the game renderer instance
+     */
     public GameRenderer getRenderer()
     {
         return renderer;
     }
 
+    /**
+     * @return the active render information
+     */
     public ActiveRenderInfo getInfo()
     {
         return info;
     }
 
+    /**
+     * @return the amount of partial ticks
+     */
     public double getRenderPartialTicks()
     {
         return renderPartialTicks;
     }
 
+    /**
+     * <p>Fired for customizing the different features of the fog visible to the player. <br/>
+     * See the various subclasses to listen for specific features. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and do not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @see EntityViewRenderEvent.FogDensity
+     * @see EntityViewRenderEvent.RenderFogEvent
+     */
     private static class FogEvent extends EntityViewRenderEvent
     {
         private final FogType type;
@@ -66,12 +104,22 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
             this.type = type;
         }
 
+        /**
+         * @return the type of fog
+         */
         public FogType getType() { return type; }
     }
 
     /**
-     * Event that allows any feature to customize the fog density the player sees.
-     * NOTE: In order to make this event have an effect, you must cancel the event
+     * <p>Fired for customizing the <b>density</b> of the fog visible to the player. </p>
+     *
+     * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+     * <em>The event must be cancelled for the custom fog density to take effect. </em></p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @see ForgeHooksClient#getFogDensity(FogType, ActiveRenderInfo, float, float)
      */
     @Cancelable
     public static class FogDensity extends FogEvent
@@ -84,11 +132,19 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
             this.setDensity(density);
         }
 
+        /**
+         * @return the density of the fog
+         */
         public float getDensity()
         {
             return density;
         }
 
+        /**
+         * Sets the new density of the fog, which only takes effect if the event is cancelled.
+         *
+         * @param density the new fog density
+         */
         public void setDensity(float density)
         {
             this.density = density;
@@ -96,7 +152,15 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
     }
 
     /**
-     * Event that allows any feature to customize the rendering of fog.
+     * <p>Fired for customizing the <b>rendering</b> of the fog visible to the player. </p>
+     *
+     * <p>This event is {@linkplain Cancelable cancelable}, and {@linkplain HasResult has a result}. </p>
+     * TODO: review if this event needs a result.
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @see ForgeHooksClient#onFogRender(FogType, ActiveRenderInfo, float, float)
      */
     @HasResult
     public static class RenderFogEvent extends FogEvent
@@ -109,6 +173,7 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
             this.farPlaneDistance = distance;
         }
 
+        // TODO: find out what this means
         public float getFarPlaneDistance()
         {
             return farPlaneDistance;
@@ -116,8 +181,14 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
     }
 
     /**
-     * Event that allows any feature to customize the color of fog the player sees.
-     * NOTE: Any change made to one of the color variables will affect the result seen in-game.
+     * <p>Fired for customizing the <b>color</b> of the fog visible to the player. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @see FogRenderer#updateFogColor(ActiveRenderInfo, float, ClientWorld, int, float)
      */
     public static class FogColors extends EntityViewRenderEvent
     {
@@ -133,16 +204,53 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
             this.setBlue(blue);
         }
 
+        /**
+         * @return the red color value of the fog
+         */
         public float getRed() { return red; }
+
+        /**
+         * Sets the new red color value of the fog.
+         *
+         * @param red the new red color value
+         */
         public void setRed(float red) { this.red = red; }
+
+        /**
+         * @return the green color value of the fog
+         */
         public float getGreen() { return green; }
+
+        /**
+         * Sets the new green color value of the fog.
+         *
+         * @param green the new blue color value
+         */
         public void setGreen(float green) { this.green = green; }
+
+        /**
+         * @return the blue color value of the fog
+         */
         public float getBlue() { return blue; }
+
+        /**
+         * Sets the new blue color value of the fog.
+         *
+         * @param blue the new blue color value
+         */
         public void setBlue(float blue) { this.blue = blue; }
     }
 
     /**
-     * Event that allows mods to alter the angles of the player's camera. Mainly useful for applying roll.
+     * <p>Fired for altering the angles of the player's camera. <br/>
+     * This can be used to alter the player's view for different effects, such as applying roll. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @see ForgeHooksClient#onCameraSetup(GameRenderer, ActiveRenderInfo, float)
      */
     public static class CameraSetup extends EntityViewRenderEvent
     {
@@ -158,18 +266,55 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
             this.setRoll(roll);
         }
 
+        /**
+         * @return the yaw of the player's camera
+         */
         public float getYaw() { return yaw; }
+
+        /**
+         * Sets the yaw of the player's camera.
+         *
+         * @param yaw the new yaw
+         */
         public void setYaw(float yaw) { this.yaw = yaw; }
+
+        /**
+         * @return the pitch of the player's camera
+         */
         public float getPitch() { return pitch; }
+
+        /**
+         * Sets the pitch of the player's camera.
+         *
+         * @param pitch the new pitch
+         */
         public void setPitch(float pitch) { this.pitch = pitch; }
+
+        /**
+         * @return the roll of the player's camera
+         */
         public float getRoll() { return roll; }
+
+        /**
+         * Sets the roll of the player's camera.
+         *
+         * @param roll the new roll
+         */
         public void setRoll(float roll) { this.roll = roll; }
     }
 
     /**
-     * Event that allows mods to alter the raw FOV itself.
-     * This directly affects to the FOV without being modified.
-     * */
+     * <p>Fired for altering the raw FOV (field of vision). <br/>
+     * This is after the e.g. FOV settings are applied, and before modifiers such as the Nausea effect. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @see ForgeHooksClient#getFOVModifier(GameRenderer, ActiveRenderInfo, double, double)
+     * @see FOVUpdateEvent
+     */
     public static class FOVModifier extends EntityViewRenderEvent
     {
         private double fov;
@@ -179,10 +324,18 @@ public abstract class EntityViewRenderEvent extends net.minecraftforge.eventbus.
             this.setFOV(fov);
         }
 
+        /**
+         * @return the raw FOV (field of vision) value
+         */
         public double getFOV() {
             return fov;
         }
 
+        /**
+         * Sets the new raw FOV (field of vision) value
+         *
+         * @param fov the new FOV value
+         */
         public void setFOV(double fov) {
             this.fov = fov;
         }

@@ -19,18 +19,30 @@
 
 package net.minecraftforge.client.event;
 
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
- * Fired on the client when a chat message is received.<br>
- * If this event is cancelled, the message is not displayed in the chat message window.<br>
- * Fired on {@link net.minecraftforge.common.MinecraftForge#EVENT_BUS}.
+ * <p>Fired on the client when a chat message is received. <br/>
+ * This can be used for filtering and detecting messages with specific words or phrases, and suppressing them. </p>
+ *
+ * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+ * If the event is cancelled, the message is not displayed in the chat message window. </p>
+ *
+ * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+ *
+ * @see ChatType
+ * @see ForgeEventFactory#onClientChat(ChatType, ITextComponent, UUID)
  */
 @Cancelable
 public class ClientChatReceivedEvent extends Event
@@ -47,24 +59,34 @@ public class ClientChatReceivedEvent extends Event
         this.senderUUID = senderUUID;
     }
 
+    /**
+     * @return the message that will be displayed in the chat message window, if the event is not cancelled
+     */
     public ITextComponent getMessage()
     {
         return message;
     }
 
+    /**
+     * Sets the new message to be displayed in the chat message window, if the event is not cancelled.
+     *
+     * @param message the new message to be sent
+     */
     public void setMessage(ITextComponent message)
     {
         this.message = message;
     }
 
+    /**
+     * @return the type of the message
+     */
     public ChatType getType()
     {
         return type;
     }
 
     /**
-     * The UUID of the player or entity that sent this message, or null if not known.
-     * This will be equal to {@link net.minecraft.util.Util#field_240973_b_} for system messages.
+     * @return the UUID of the sender, or {@code null}
      */
     @Nullable
     public UUID getSenderUUID()

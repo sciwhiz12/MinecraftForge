@@ -21,10 +21,29 @@ package net.minecraftforge.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.LogicalSide;
 
-public class RenderWorldLastEvent extends net.minecraftforge.eventbus.api.Event
+/**
+ * <p>Fired after all world rendering. <br/>
+ * This can be used for custom rendering outside of e.g. a tile entity or entity renderer. </p>
+ *
+ * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+ *
+ * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+ * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+ *
+ * @see ForgeHooksClient#dispatchRenderLast(WorldRenderer, MatrixStack, float, Matrix4f, long)
+ * @see GameRenderer
+ * @see WorldRenderer
+ */
+public class RenderWorldLastEvent extends Event
 {
     private final WorldRenderer context;
     private final MatrixStack mat;
@@ -41,26 +60,42 @@ public class RenderWorldLastEvent extends net.minecraftforge.eventbus.api.Event
         this.finishTimeNano = finishTimeNano;
     }
 
+    /**
+     * @return the world renderer
+     */
     public WorldRenderer getContext()
     {
         return context;
     }
 
+    /**
+     * @return the matrix stack used for rendering
+     */
     public MatrixStack getMatrixStack()
     {
         return mat;
     }
 
+    /**
+     * @return the amount of partial ticks
+     */
     public float getPartialTicks()
     {
         return partialTicks;
     }
 
+    /**
+     * @return the projection matrix
+     */
     public Matrix4f getProjectionMatrix()
     {
         return projectionMatrix;
     }
 
+    /**
+     *
+     * @return the time when rendering started, in nanoseconds
+     */
     public long getFinishTimeNano()
     {
         return finishTimeNano;

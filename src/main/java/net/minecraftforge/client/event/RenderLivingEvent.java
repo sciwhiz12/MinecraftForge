@@ -21,12 +21,26 @@ package net.minecraftforge.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
+import net.minecraftforge.fml.LogicalSide;
 
+/**
+ * <p>Fired when a {@link LivingEntity} is rendered. <br/>
+ * See the two subclasses to listen for before and after rendering. </p>
+ *
+ * @param <T> the living entity that is being rendered
+ * @param <M> the model for the living entity
+ *
+ * @see RenderLivingEvent.Pre
+ * @see RenderLivingEvent.Post
+ * @see RenderPlayerEvent
+ * @see LivingRenderer
+ */
 public abstract class RenderLivingEvent<T extends LivingEntity, M extends EntityModel<T>> extends Event
 {
 
@@ -48,13 +62,50 @@ public abstract class RenderLivingEvent<T extends LivingEntity, M extends Entity
         this.light = light;
     }
 
+    /**
+     * @return the living entity being rendered
+     */
     public LivingEntity getEntity() { return entity; }
+
+    /**
+     * @return the renderer for the living entity
+     */
     public LivingRenderer<T, M> getRenderer() { return renderer; }
+
+    /**
+     * @return the amount of partial ticks
+     */
     public float getPartialRenderTick() { return partialRenderTick; }
+
+    /**
+     * @return the matrix stack used for rendering
+     */
     public MatrixStack getMatrixStack() { return matrixStack; }
+
+    /**
+     * @return the rendering buffers
+     */
     public IRenderTypeBuffer getBuffers() { return buffers; }
+
+    /**
+     * @return the amount of packed (sky and block) light for rendering
+     */
     public int getLight() { return light; }
 
+    /**
+     * <p>Fired <b>before</b> an entity is rendered. <br/>
+     * This can be used to render additional effects or suppress rendering. </p>
+     *
+     * <p>This event is {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. <br/>
+     * If this event is cancelled, then the entity will not be rendered and the corresponding
+     * {@link RenderLivingEvent.Post} will not be fired. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @param <T> the living entity that is being rendered
+     * @param <M> the model for the living entity
+     */
     @Cancelable
     public static class Pre<T extends LivingEntity, M extends EntityModel<T>> extends RenderLivingEvent<T, M>
     {
@@ -63,6 +114,17 @@ public abstract class RenderLivingEvent<T extends LivingEntity, M extends Entity
         }
     }
 
+    /**
+     * <p>Fired <b>after</b> an entity is rendered, if the corresponding {@link RenderLivingEvent.Post} is not cancelled. </p>
+     *
+     * <p>This event is not {@linkplain Cancelable cancelable}, and does not {@linkplain HasResult have a result}. </p>
+     *
+     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
+     *
+     * @param <T> the living entity that was rendered
+     * @param <M> the model for the living entity
+     */
     public static class Post<T extends LivingEntity, M extends EntityModel<T>> extends RenderLivingEvent<T, M>
     {
         public Post(LivingEntity entity, LivingRenderer<T, M> renderer, float partialRenderTick, MatrixStack matrixStack, IRenderTypeBuffer buffers, int light) {
