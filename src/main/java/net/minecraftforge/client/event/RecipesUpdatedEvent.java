@@ -20,7 +20,6 @@
 package net.minecraftforge.client.event;
 
 import net.minecraft.item.crafting.RecipeManager;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;

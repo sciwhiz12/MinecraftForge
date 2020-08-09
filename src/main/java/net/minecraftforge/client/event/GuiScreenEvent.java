@@ -20,9 +20,7 @@
 package net.minecraftforge.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
-import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.util.InputMappings;
@@ -81,10 +79,10 @@ public class GuiScreenEvent extends Event
      */
     public static class InitGuiEvent extends GuiScreenEvent
     {
-        private Consumer<Widget> add;
-        private Consumer<Widget> remove;
+        private final Consumer<Widget> add;
+        private final Consumer<Widget> remove;
 
-        private List<Widget> list;
+        private final List<Widget> list;
 
         public InitGuiEvent(Screen gui, List<Widget> list, Consumer<Widget> add, Consumer<Widget> remove)
         {

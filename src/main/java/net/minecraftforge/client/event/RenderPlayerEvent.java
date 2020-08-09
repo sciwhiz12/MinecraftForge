@@ -25,11 +25,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.LogicalSide;
-
-import javax.annotation.Nonnull;
 
 /**
  * <p>Fired when a player is being rendered. <br/>

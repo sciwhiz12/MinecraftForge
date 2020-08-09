@@ -19,17 +19,13 @@
 
 package net.minecraftforge.client.event;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraft.state.Property;
 import net.minecraft.util.IItemProvider;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.LogicalSide;

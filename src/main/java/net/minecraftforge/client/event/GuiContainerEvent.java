@@ -20,15 +20,11 @@
 package net.minecraftforge.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.multiplayer.PlayerController;
-import net.minecraft.network.NetworkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.client.ClientHooks;
 
 /**
  * <p>Fired for hooking into {@link ContainerScreen} rendering. <br/>
@@ -43,9 +39,9 @@ import net.minecraftforge.fml.client.ClientHooks;
 public class GuiContainerEvent extends Event
 {
 
-    private final ContainerScreen guiContainer;
+    private final ContainerScreen<?> guiContainer;
 
-    public GuiContainerEvent(ContainerScreen guiContainer)
+    public GuiContainerEvent(ContainerScreen<?> guiContainer)
     {
         this.guiContainer = guiContainer;
     }
@@ -53,7 +49,7 @@ public class GuiContainerEvent extends Event
     /**
      * @return the container's screen
      */
-    public ContainerScreen getGuiContainer()
+    public ContainerScreen<?> getGuiContainer()
     {
         return guiContainer;
     }
@@ -76,7 +72,7 @@ public class GuiContainerEvent extends Event
         private final int mouseX;
         private final int mouseY;
 
-        public DrawForeground(ContainerScreen guiContainer, MatrixStack mStack, int mouseX, int mouseY)
+        public DrawForeground(ContainerScreen<?> guiContainer, MatrixStack mStack, int mouseX, int mouseY)
         {
             super(guiContainer);
             this.mStack = mStack;
@@ -124,7 +120,7 @@ public class GuiContainerEvent extends Event
         private final int mouseX;
         private final int mouseY;
 
-        public DrawBackground(ContainerScreen guiContainer, MatrixStack mStack, int mouseX, int mouseY)
+        public DrawBackground(ContainerScreen<?> guiContainer, MatrixStack mStack, int mouseX, int mouseY)
         {
             super(guiContainer);
             this.mStack = mStack;

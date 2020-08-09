@@ -21,7 +21,6 @@ package net.minecraftforge.client.event;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraft.client.renderer.texture.AtlasTexture;

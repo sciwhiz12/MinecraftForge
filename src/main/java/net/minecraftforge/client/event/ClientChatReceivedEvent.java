@@ -19,7 +19,6 @@
 
 package net.minecraftforge.client.event;
 
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;

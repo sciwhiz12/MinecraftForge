@@ -22,7 +22,6 @@ package net.minecraftforge.client.event;
 import java.util.ArrayList;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
@@ -80,7 +79,7 @@ public class RenderGameOverlayEvent extends Event
     /**
      * The types of the different overlay elements that can be rendered
      */
-    public static enum ElementType
+    public enum ElementType
     {
         /**
          * Represents all of the overlay elements; cancelling the {@link RenderGameOverlayEvent.Pre} with this type will

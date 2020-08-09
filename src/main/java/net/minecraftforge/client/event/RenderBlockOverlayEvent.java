@@ -22,7 +22,6 @@ package net.minecraftforge.client.event;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.FireBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
@@ -46,7 +45,7 @@ import net.minecraftforge.fml.LogicalSide;
 public class RenderBlockOverlayEvent extends Event
 {
 
-    public static enum OverlayType {
+    public enum OverlayType {
         /**
          * The type of the overlay when the player is burning / on fire.
          */
