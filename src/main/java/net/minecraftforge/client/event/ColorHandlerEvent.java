@@ -25,7 +25,6 @@ import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.util.IItemProvider;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.LogicalSide;
@@ -35,11 +34,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 /**
  * <p>Fired for registering block and item color handlers at the appropriate time. <br/>
  * See the two subclasses for registering blocks or items color handlers. </p>
- *
- * <p>These events are not {@linkplain Cancelable cancelable}, and do not {@linkplain HasResult have results}. </p>
- *
- * <p>These events are fired on the {@linkplain FMLJavaModLoadingContext#getModEventBus() mod-specific event bus},
- * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
  *
  * @see ColorHandlerEvent.Block
  * @see ColorHandlerEvent.Item
@@ -51,7 +45,7 @@ public abstract class ColorHandlerEvent extends Event implements IModBusEvent
      *
      * <p>This event is not {@linkplain Cancelable cancelable}, and do not {@linkplain HasResult have a result}. </p>
      *
-     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * <p>This event is fired on the {@linkplain FMLJavaModLoadingContext#getModEventBus() mod-specific event bus},
      * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
      *
      * @see ForgeHooksClient#onBlockColorsInit(BlockColors)
@@ -84,7 +78,7 @@ public abstract class ColorHandlerEvent extends Event implements IModBusEvent
      *
      * <p>This event is not {@linkplain Cancelable cancelable}, and do not {@linkplain HasResult have a result}. </p>
      *
-     * <p>This event is fired on the {@linkplain MinecraftForge#EVENT_BUS main Forge event bus},
+     * <p>This event is fired on the {@linkplain FMLJavaModLoadingContext#getModEventBus() mod-specific event bus},
      * only on the {@linkplain LogicalSide#CLIENT logical client}. </p>
      *
      * @see ForgeHooksClient#onItemColorsInit(ItemColors, BlockColors)
