@@ -19,57 +19,87 @@
 
 package net.minecraftforge.fml;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.resources.IResourcePack;
+import net.minecraftforge.fml.client.gui.screen.ModListScreen;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
+import net.minecraftforge.fml.packs.ModFileResourcePack;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.resources.IResourcePack;
-import net.minecraftforge.fml.packs.ModFileResourcePack;
-
+/**
+ * Extension points for mods.
+ * <p>
+ * Mods can register extension operators for {@code ExtensionPoint}s in their mods, to allow some customization by the
+ * mod for some aspects of Forge. Extension points are not required to be registered by mods.
+ * @param <T> The type of the extension operator
+ * @see ModLoadingContext#registerExtensionPoint(ExtensionPoint, Supplier)
+ */
 public class ExtensionPoint<T>
 {
+    /**
+     * Configuration screen factory for the mod. Used in the mods list screen to display a custom configuration screen.
+     * <p>
+     * The extension point consists of a {@link BiFunction}, accepting two objects: the {@link Minecraft} instance and
+     * the currently open screen (the {@link ModListScreen}), and returns a new {@link Screen} which will automatically
+     * be displayed on the window.
+     * <p>
+     * The config button for the mod on the mods list screen will be inactive unless this extension point is present in
+     * the mod. Forge may also provide a default configuration screen factory (in which case the button will be enabled
+     * by default), but this can be overridden by mods through this extension point.
+     * <code><pre>
+     * {@link ModLoadingContext mlc}.{@link ModLoadingContext#registerExtensionPoint(ExtensionPoint, Supplier)
+     * registerExtensionPoint}(CONFIGGUIFACTORY, () -> (minecraft, modsListScreen) -> new MyConfigScreen(minecraft, modsListScreen))
+     * </code></pre>
+     */
     public static final ExtensionPoint<BiFunction<Minecraft, Screen, Screen>> CONFIGGUIFACTORY = new ExtensionPoint<>();
+    // TODO: this is not used anywhere; removed on purpose or accidentally?
     public static final ExtensionPoint<BiFunction<Minecraft, ModFileResourcePack, IResourcePack>> RESOURCEPACK = new ExtensionPoint<>();
     /**
-     * Compatibility display test for the mod.
-     * Used for displaying compatibility with remote servers with the same mod, and on disk saves.
-     *
-     * The supplier provides my "local" version for sending across the network or writing to disk
-     * The predicate tests the version from a remote instance or save for acceptability (Boolean is true for network, false for local save)
-     * and returns true if the version is compatible.
-     *
-     * <p>Return {@link net.minecraftforge.fml.network.FMLNetworkConstants#IGNORESERVERONLY} in the supplier, if you wish to be ignored
-     * as a server side only mod.</p>
-     * <p>Return true in the predicate for all values of the input string (when network boolean is true) if you are client side,
-     * and don't care about matching any potential server version.</p>
-     *
+     * Compatibility display test for the mod. Used by the client to display mod compatibility with remote servers and
+     * with disk saves.
      * <p>
-     * Examples: A server only mod
-     *
+     * The extension point consists of a {@link Pair} of a {@link Supplier} and a {@link BiPredicate}.
+     * <ul>
+     *     <li>The {@code Supplier} provides a string: this is the "local" mod version, which is sent over the network
+     *     or written to disk. </li>
+     *     <li>The {@code BiPredicate} accepts a string and a boolean; the (possibly-{@code null}) string is the mod
+     *     version from the remote server or the local save (the "remote" version), and the boolean indicates if the
+     *     version comes from over the network (otherwise, it comes from a local save).
+     *     <p>
+     *     The predicate returns whether the given version from the specified location is compatible with the local version.</li>
+     * </ul>
+     * For server-side only mods, supply {@link FMLNetworkConstants#IGNORESERVERONLY} for the local version (so it will
+     * be ignored when present on the server), and the predicate should accept any remote version from anywhere.
      * <code><pre>
-     *     registerExtensionPoint(DISPLAYTEST, ()->Pair.of(
-     *      ()->FMLNetworkConstants.IGNORESERVERONLY, // ignore me, I'm a server only mod
-     *      (s,b)->true // i accept anything from the server or the save, if I'm asked
-     *     )
-     * </pre></code>
-     * </p>
+     * {@link ModLoadingContext mlc}.{@link ModLoadingContext#registerExtensionPoint(ExtensionPoint, Supplier)
+     * registerExtensionPoint}(DISPLAYTEST, () -> Pair.of(
+     *     () -> FMLNetworkConstants.IGNORESERVERONLY, // Ignore this mod because it's server-only
+     *     (remoteVersion, network) -> true // Accept any version, whether from network or save
+     * ))
+     * </code></pre>
      * <p>
-     * Examples: A client only mod
+     * For client-side only mods, supply any string for the local version, and the predicate should accept any remote
+     * version if it comes from the network.
      * <code><pre>
-     *     registerExtensionPoint(DISPLAYTEST, ()->Pair.of(
-     *      ()->"anything. i don't care", // if i'm actually on the server, this string is sent but i'm a client only mod, so it won't be
-     *      (remoteversionstring,networkbool)->networkbool // i accept anything from the server, by returning true if it's asking about the server
-     *     )
-     * </pre></code>
-     * </p>
-     *
+     * mlc.registerExtensionPoint(DISPLAYTEST, () -> Pair.of(
+     *     () -> "dQw4w9WgXcQ", // This will be ignored even if sent by the server because of the predicate
+     *     (remoteVersion, network) -> network // Accept any version from the server
+     * ))
+     * </code></pre>
+     * <p>
+     * <strong>Note: </strong><em>This does not absolutely determine if a client is compatible with the server and can
+     * connect successfully.</em> Other factors may apply to the connection, such as difference in network protocols or
+     * registry contents, forced disconnection by mods, banned status, and others.
      */
     public static final ExtensionPoint<Pair<Supplier<String>, BiPredicate<String, Boolean>>> DISPLAYTEST = new ExtensionPoint<>();
 
+    // TODO: this is not used anywhere
     private Class<T> type;
 
     private ExtensionPoint() {
