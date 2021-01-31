@@ -24,6 +24,10 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 
 
+/**
+ * @deprecated To be removed in 1.17
+ */
+@Deprecated
 public class GameRegistry
 {
     /**
@@ -33,7 +37,9 @@ public class GameRegistry
      *
      * @param registryType The base class of items in this registry.
      * @return The registry, Null if none is registered.
+     * @deprecated To be removed in 1.17, see {@link RegistryManager#ACTIVE}{@code .}{@link RegistryManager#getRegistry(Class)}
      */
+    @Deprecated
     public static <K extends IForgeRegistryEntry<K>> IForgeRegistry<K> findRegistry(Class<K> registryType)
     {
         return RegistryManager.ACTIVE.getRegistry(registryType);
