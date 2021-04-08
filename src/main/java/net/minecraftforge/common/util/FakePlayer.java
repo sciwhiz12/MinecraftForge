@@ -28,7 +28,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.*;
@@ -58,16 +57,16 @@ public class FakePlayer extends ServerPlayerEntity
         connection = new FakeServerPlayerNetHandler(world.getServer(), this);
     }
 
-    @Override public Vector3d position(){ return new Vector3d(0, 0, 0); }
-    @Override public BlockPos blockPosition(){ return BlockPos.ZERO; }
-    @Override public void displayClientMessage(ITextComponent chatComponent, boolean actionBar){}
-    @Override public void sendMessage(ITextComponent component, UUID senderUUID) {}
-    @Override public void awardStat(Stat par1StatBase, int par2){}
-    @Override public boolean isInvulnerableTo(DamageSource source){ return true; }
-    @Override public boolean canHarmPlayer(PlayerEntity player){ return false; }
-    @Override public void die(DamageSource source){ return; }
-    @Override public void tick(){ return; }
-    @Override public void updateOptions(CClientSettingsPacket pkt){ return; }
+    @Override public Vector3d position() { return new Vector3d(0, 0, 0); }
+    @Override public BlockPos blockPosition() { return BlockPos.ZERO; }
+    @Override public void displayClientMessage(ITextComponent message, boolean actionBar) { /* noop */ }
+    @Override public void sendMessage(ITextComponent message, UUID senderUUID) { /* noop */ }
+    @Override public void awardStat(Stat<?> stat, int amount) { /* noop */ }
+    @Override public boolean isInvulnerableTo(DamageSource source) { return true; }
+    @Override public boolean canHarmPlayer(PlayerEntity player) { return false; }
+    @Override public void die(DamageSource source) { /* noop */ }
+    @Override public void tick() { /* noop */ }
+    @Override public void updateOptions(CClientSettingsPacket packet) { /* noop */ }
     @Override @Nullable public MinecraftServer getServer() { return ServerLifecycleHooks.getCurrentServer(); }
 
     static class FakeServerPlayerNetHandler extends ServerPlayNetHandler {
