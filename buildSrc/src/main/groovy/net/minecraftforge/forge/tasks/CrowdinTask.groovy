@@ -1,6 +1,8 @@
 package net.minecraftforge.forge.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Optional
@@ -12,11 +14,13 @@ import java.util.zip.ZipOutputStream
 import java.net.URL
 
 public class CrowdinTask extends DefaultTask {
-    @Input String id = 'minecraft-forge'
-	@Input @Optional String key
+    @Input final Property<String> id = project.objects.property(String).convention('minecraft-forge')
+	@Input @Optional final Property<String> key = project.objects.property(String)
 	@Input boolean json = true
-	@OutputFile output = project.file("build/${name}/output.zip")
-	@OutputFile export = project.file("build/${name}/export.json")
+	@OutputFile final RegularFileProperty output = project.objects.fileProperty()
+			.convention(project.layout.buildDirectory.dir(name).map {it.file("output.zip") })
+	@OutputFile final RegularFileProperty export = project.objects.fileProperty()
+			.convention(project.layout.buildDirectory.dir(name).map {it.file("export.json") })
 	
 	CrowdinTask() {
 		outputs.upToDateWhen{ false }
@@ -24,24 +28,28 @@ public class CrowdinTask extends DefaultTask {
 
     @TaskAction
     def run() {
-		if (output.exists())
-			output.delete()
+		File outputFile = output.get().asFile
+		File exportFile = export.get().asFile
+		if (outputFile.exists())
+			outputFile.delete()
 		
-		if (key == null)
+		if (!key.isPresent())
 			return
+		String key = this.key.get()
+		String id = this.id.get()
 		
 		// Force an export
-		new URL("https://api.crowdin.com/api/project/${id}/export?key=${key}").withInputStream { i -> 
-			export.withOutputStream { it << i }
+		new URL("https://api.crowdin.com/api/project/${id}/export?key=${key}").withInputStream { i ->
+			exportFile.withOutputStream { it << i }
 		}
 		
-		if (!export.text.contains('success')) {
-			throw new RuntimeException("Crowdin export failed, see ${export} for more info")
+		if (!exportFile.text.contains('success')) {
+			throw new RuntimeException("Crowdin export failed, see ${exportFile} for more info")
 		}
 
 		new URL("https://api.crowdin.com/api/project/${id}/download/all.zip?key=${key}").withInputStream { i -> 
 			new ZipInputStream(i).withCloseable { zin ->
-				output.withOutputStream { out ->
+				outputFile.withOutputStream { out ->
 					new ZipOutputStream(out).withCloseable { zout -> 
 						ZipEntry zein
 						while ((zein = zin.nextEntry) != null) {

@@ -3,6 +3,7 @@ package net.minecraftforge.forge.tasks
 import groovy.json.JsonBuilder
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -18,19 +19,21 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 public abstract class BytecodeFinder extends DefaultTask {
-    @InputFile File jar
-    @OutputFile output = project.file("build/${name}/output.json")
+    @InputFile final RegularFileProperty jar = project.objects.fileProperty()
+    @OutputFile final RegularFileProperty output = project.objects.fileProperty()
+            .convention(project.layout.buildDirectory.dir(name).map {it.file("output.json") })
     
     @TaskAction
     protected void exec() {
         Util.init()
-        
-        if (output.exists())
-            output.delete()
+
+        def outputFile = output.get().asFile
+        if (outputFile.exists())
+            outputFile.delete()
             
         pre()
         
-        jar.withInputStream { i -> 
+        jar.get().asFile.withInputStream { i ->
             new ZipInputStream(i).withCloseable { zin ->
                 ZipEntry zein
                 while ((zein = zin.nextEntry) != null) {
@@ -44,7 +47,7 @@ public abstract class BytecodeFinder extends DefaultTask {
         }
         
         post()
-        output.text = new JsonBuilder(getData()).toPrettyString()
+        outputFile.text = new JsonBuilder(getData()).toPrettyString()
     }
     
     

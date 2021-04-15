@@ -1,29 +1,29 @@
 package net.minecraftforge.forge.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputDirectory
 
-import java.io.File
-import java.util.HashSet
-import java.util.Set
-import java.net.URL
-
 public class DownloadLibrariesTask extends DefaultTask {
-    @InputFile File input
-	@OutputDirectory File output = project.file("build/${name}/")
-	Set<File> libraries = new HashSet<>()
+	@InputFile final RegularFileProperty input = project.objects.fileProperty()
+	@OutputDirectory final DirectoryProperty output = project.objects.directoryProperty()
+			.convention(project.layout.buildDirectory.dir(name))
+	final ConfigurableFileCollection libraries = project.objects.fileCollection()
 
     @TaskAction
     def run() {
 		Util.init()
+		File outputDir = output.get().asFile
 		
-		def json = input.json().libraries.each { lib ->
+		def json = input.get().asFile.json().libraries.each { lib ->
 		    //TODO: Thread?
 			def artifacts = [lib.downloads.artifact] + lib.downloads.get('classifiers', [:]).values()
 			artifacts.each{ art -> 
-				def target = new File(output, art.path)
+				def target = new File(outputDir, art.path)
 				libraries.add(target)
 				if (!target.exists() || !art.sha1.equals(target.sha1())) {
 					project.logger.lifecycle("Downloading ${art.url}")

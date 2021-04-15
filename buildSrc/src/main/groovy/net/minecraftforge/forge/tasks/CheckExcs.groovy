@@ -1,7 +1,7 @@
 package net.minecraftforge.forge.tasks
 
-import java.util.ArrayList
-import java.util.TreeMap
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.RegularFileProperty
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFile
@@ -18,14 +18,14 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 public class CheckExcs extends DefaultTask {
-	@InputFile File binary
-	@InputFiles File[] excs
+	@InputFile final RegularFileProperty binary = project.objects.fileProperty()
+	@InputFiles final ConfigurableFileCollection excs = project.objects.fileCollection();
 	
     @TaskAction
     protected void exec() {
 		Util.init()
 		def known = []
-		binary.withInputStream { i -> 
+		binary.get().asFile.withInputStream { i ->
 			new ZipInputStream(i).withCloseable { zin ->
 				def visitor = new ClassVisitor(Opcodes.ASM7) {
 					private String cls

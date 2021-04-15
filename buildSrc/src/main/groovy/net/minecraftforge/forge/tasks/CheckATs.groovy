@@ -1,7 +1,7 @@
 package net.minecraftforge.forge.tasks
 
-import java.util.ArrayList
-import java.util.TreeMap
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.RegularFileProperty
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFile
@@ -10,8 +10,8 @@ import org.gradle.api.tasks.TaskAction
 import org.objectweb.asm.Opcodes
 
 public class CheckATs extends DefaultTask {
-	@InputFile File inheritance
-	@InputFiles File[] ats
+	@InputFile final RegularFileProperty inheritance = project.objects.fileProperty()
+	@InputFiles final ConfigurableFileCollection ats = project.objects.fileCollection()
 	
     @TaskAction
     protected void exec() {
@@ -41,7 +41,7 @@ public class CheckATs extends DefaultTask {
 				default:          return -1
 			}
 		}
-		def json = inheritance.json()
+		def json = inheritance.get().asFile.json()
 		
 		ats.each { f -> 
 			TreeMap lines = [:]

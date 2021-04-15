@@ -1,22 +1,21 @@
 package net.minecraftforge.forge.tasks
 
-import java.util.ArrayList
-import java.util.TreeMap
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.RegularFileProperty
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
-import org.objectweb.asm.Opcodes
 
 public class CheckSAS extends DefaultTask {
-	@InputFile File inheritance
-	@InputFiles File[] sass
+	@InputFile final RegularFileProperty inheritance = project.objects.fileProperty()
+	@InputFiles final ConfigurableFileCollection sass = project.objects.fileCollection()
 	
     @TaskAction
     protected void exec() {
 		Util.init()
-		def json = inheritance.json()
+		def json = inheritance.get().asFile.json()
 		
 		sass.each { f -> 
 			def lines = []
